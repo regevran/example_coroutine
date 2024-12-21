@@ -22,15 +22,17 @@ void print_char(unsigned char c) {
 }
 
 void random_read() {
-
+    ////////
+    // to be called like this:
+    //  random_read();
+    ////////
     async_random_char arc;
     arc.async_read(print_char);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
 }
 
-basic_coroutine coro_read()
-{
+basic_coroutine coro_read() {
     ////////
     // to be called like this:
     //  coro_read();
@@ -41,9 +43,20 @@ basic_coroutine coro_read()
     print_char(c);
 }
 
+task task_read() {
+    unsigned char c = co_await awitable_random_char{};
+    print_char(c);
+}
+
 int main()
 {
+    reactor r;
 
+    auto read = task_read();
+    r.add_task(read);
+    r.run();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
     return 0;
 }
 

@@ -21,14 +21,15 @@ private:
         awiter_random_char(awitable_random_char& awaitable)
             : awaitable_(awaitable) {}
 
-        bool await_ready() {return false;}
+        bool await_ready() {return value_received_;}
 
-        void await_suspend(std::coroutine_handle<> handle) noexcept {
+        bool await_suspend(std::coroutine_handle<> handle) noexcept {
             arc_.async_read(
                 [this, handle](unsigned char c){
                     awaitable_.value_ = c;
-                    handle.resume();
+                    value_received_ = true;
                 });
+            return !value_received_;
         }
 
         unsigned char await_resume() const noexcept {
@@ -36,8 +37,9 @@ private:
         }
 
     private:
-        async_random_char arc_;
+        async_random_char arc_ {};
         awitable_random_char& awaitable_;
+        bool value_received_ {false};
     };
 
 public:

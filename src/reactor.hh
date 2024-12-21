@@ -3,12 +3,13 @@
 #pragma once
 
 #include "task.hh"
+#include <queue>
 
 class reactor {
 
 public:
     void add_task(task t) {
-        coroutines_.push_back(t.get_handle());
+        coroutines_.push(t.get_handle());
     }
 
     void run() {
@@ -21,11 +22,11 @@ public:
             if (handle.done()) {
                 handle.destroy();
             } else {
-                coroutines_.push_back(handle);
+                coroutines_.push(handle);
             }
         }
     }    
 
 private:
-    std::queue<std::coroutine_handle<>> coroutines_;
+    std::queue<std::coroutine_handle<task::promise_type>> coroutines_;
 };
