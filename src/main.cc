@@ -43,18 +43,26 @@ basic_coroutine coro_read() {
     print_char(c);
 }
 
+/*
 task task_read() {
     unsigned char c = co_await awitable_random_char{};
     print_char(c);
 }
+*/
+
+task async_work() {
+    co_return;
+}
+
 
 int main()
 {
-    reactor r;
+    //auto read = task_read();
 
-    auto read = task_read();
-    r.add_task(read);
-    r.run();
+    auto plain_task = async_work();
+
+    coroutine_framework::run(); 
+    std::cout << coroutine_framework::get_reactor();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
     return 0;

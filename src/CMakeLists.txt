@@ -3,6 +3,8 @@
 add_executable(
     ${PROJ_NAME}
     main.cc
+    task.cc
+    reactor.cc
 )
 
 set(CMAKE_BUILD_TYPE Debug)
