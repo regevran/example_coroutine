@@ -19,17 +19,18 @@ public:
     };
 
 public:
-    task(promise_type* owned);
-    task(task&) = delete;
-    task(task&&);
+    task(std::coroutine_handle<promise_type>);
+    task(const task& rhs);
+    task& operator=(const task&) = delete;
+    ~task();
 
 public:
-    std::coroutine_handle<promise_type> get_handle() const; 
+    void resume();
     void set_ready();
     bool is_ready() const;
 
 private:
-    promise_type* owned_ = nullptr;
+    std::coroutine_handle<promise_type> coro_handle_;
     bool ready_ = false;
 };
 

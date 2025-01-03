@@ -61,6 +61,9 @@ int main()
 
     auto plain_task = async_work();
 
+    std::cout << coroutine_framework::get_reactor();
+
+
     coroutine_framework::run(); 
     std::cout << coroutine_framework::get_reactor();
 

@@ -16,8 +16,8 @@ void run() {
 }
 
 
-void add_suspended_task(task&& t) {
-    g_reactor.add_suspended_task(std::move(t));
+void add_suspended_task(task t) {
+    g_reactor.add_suspended_task(t);
 }
 
 const reactor& get_reactor() {
@@ -30,25 +30,20 @@ const reactor& get_reactor() {
 
 namespace coroutine_framework {
 
-void reactor::add_suspended_task(task&& t) {
-    suspended_tasks_.emplace_back(std::move(t));
+void reactor::add_suspended_task(task t) {
+    suspended_tasks_.push_back(t);
 }
 
 void reactor::run() {
 
-    // move suspended-tasks to ready-tasks
-    for (
-        auto 
-            suspended_task = std::make_move_iterator(suspended_tasks_.begin()),
-            end = std::make_move_iterator(suspended_tasks_.end());
-        suspended_task != end;
-        ++suspended_task
-    ) {
-        if (suspended_task->is_ready()) {
-            ready_tasks.emplace_back(*suspended_task);
-        }
-
+    while (not suspended_tasks_.empty()) {
+        auto&& current_task = std::move(suspended_tasks_.front());
+        suspended_tasks_.pop_front();
+        current_task.resume();
+        executing_tasks_.push_back(std::move(current_task));
     }
+
+
         /*
         auto handle = coroutines_.front();
         coroutines_.pop();
@@ -69,7 +64,7 @@ std::ostream& operator<<(std::ostream& o, const coroutine_framework::reactor& r)
     o 
         << "== reactor ==\n" 
         << "suspended tasks: " << r.suspended_tasks_.size()   << "\n"
-        << "ready tasks:     " << r.ready_tasks.size()        << "\n";
+        << "exeuting tasks:  " << r.executing_tasks_.size()        << "\n";
     return o;
 }    
 
